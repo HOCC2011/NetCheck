@@ -1,8 +1,7 @@
 import Foundation
 import Network
-import Combine // Required for ObservableObject in some configurations
+import Combine
 
-// Reference: https://developer.apple.com/documentation/combine/observableobject
 class NetworkInfoService: ObservableObject {
     
     // @Published allows SwiftUI to watch these variables for changes
@@ -29,21 +28,14 @@ class NetworkInfoService: ObservableObject {
     
     // Scans network interfaces for 'utun' (VPN tunnels)
     private func checkVPNInterfaces() -> Bool {
-        var ifaddr: UnsafeMutablePointer<ifaddrs>?
-        guard getifaddrs(&ifaddr) == 0 else { return false }
-        defer { freeifaddrs(ifaddr) }
-        
-        var ptr = ifaddr
-        while ptr != nil {
-            if let interface = ptr?.pointee {
-                let name = String(cString: interface.ifa_name)
-                let flags = Int32(interface.ifa_flags)
-                if name.contains("utun") && (flags & IFF_UP) != 0 && (flags & IFF_RUNNING) != 0 {
-                    return true
+        if let settings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? Dictionary<String, Any>,
+            let scopes = settings["__SCOPED__"] as? [String:Any] {
+                for (key, _) in scopes {
+                 if key.contains("tap") || key.contains("tun") || key.contains("ppp") || key.contains("ipsec") {
+                        return true
+                    }
                 }
             }
-            ptr = ptr?.pointee.ifa_next
-        }
         return false
     }
     

@@ -91,7 +91,10 @@ struct ContentView: View {
         }
         // Refresh Public IP if network changes (e.g. VPN connects)
         .onChange(of: infoService.isVPNActive) { _ in
-            fetchPublicIP()
+            publicIP = "Loading..."
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                fetchPublicIP()
+            }
         }
     }
 
