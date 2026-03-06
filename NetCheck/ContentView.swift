@@ -40,7 +40,7 @@ struct ContentView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(infoService.isVPNActive ? Color.blue.opacity(0.1) : Color.clear)
-                    .cornerRadius(4)
+                    .cornerRadius(12)
                 }
                 
                 HStack {
@@ -56,7 +56,17 @@ struct ContentView: View {
                 }
                 .padding()
                 .background(Color.secondary.opacity(0.1))
-                .cornerRadius(8)
+                .cornerRadius(12)
+                
+                HStack {
+                    Spacer()
+                    Button(action: fetchPublicIP) {
+                        Image(systemName: "arrow.clockwise")
+                        Text("Refresh IP")
+                    }
+                    .buttonStyle(.bordered)
+                    .cornerRadius(12)
+                }
             }
             
             // --- Ping Section (unchanged) ---
@@ -83,22 +93,24 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(isPinging)
+            .cornerRadius(12)
         }
-        .padding(48)
-        .frame(minWidth: 400)
+        .padding(32)
+        .frame(minWidth: 400, minHeight: 432)
         .onAppear {
             fetchPublicIP()
         }
         // Refresh Public IP if network changes (e.g. VPN connects)
         .onChange(of: infoService.isVPNActive) { _ in
             publicIP = "Loading..."
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.75) {
                 fetchPublicIP()
             }
         }
     }
 
     private func fetchPublicIP() {
+        publicIP = "Loading..."
         infoService.getPublicIP { ip in
             self.publicIP = ip
         }
